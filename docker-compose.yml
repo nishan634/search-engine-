@@ -1,0 +1,100 @@
+# Local / single-host stack. Production hardening: see docker-compose.prod.yml + docs/DEPLOYMENT.md
+x-backend-env: &backend-env
+  env_file: .env
+  environment:
+    POSTGRES_HOST: db
+    REDIS_URL: redis://redis:6379/0
+    AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-http://minio:9000}
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-personal_search}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-personal_search}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:?set AWS_ACCESS_KEY_ID in .env}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:?set AWS_SECRET_ACCESS_KEY in .env}
+    volumes:
+      - miniodata:/data
+    ports:
+      - "127.0.0.1:9001:9001"   # MinIO console, localhost only
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $${AWS_ACCESS_KEY_ID} $${AWS_SECRET_ACCESS_KEY} &&
+      mc mb --ignore-existing local/$${AWS_STORAGE_BUCKET_NAME} &&
+      mc anonymous set none local/$${AWS_STORAGE_BUCKET_NAME}"
+    env_file: .env
+
+  backend:
+    build: ./backend
+    <<: *backend-env
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      minio-init: {condition: service_completed_successfully}
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/api/health/"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  worker:
+    build: ./backend
+    <<: *backend-env
+    command: ["./entrypoint-worker.sh"]
+    depends_on:
+      backend: {condition: service_healthy}
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        BACKEND_URL: http://backend:8000
+    environment:
+      BACKEND_URL: http://backend:8000
+    depends_on:
+      backend: {condition: service_healthy}
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:

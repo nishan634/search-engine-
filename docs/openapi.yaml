@@ -1,0 +1,1756 @@
+openapi: 3.0.3
+info:
+  title: Personal AI Search Engine API
+  version: 1.0.0
+  description: 'Private search: web, personal knowledge, and AI answers with citations.'
+paths:
+  /api/ai/answer/:
+    post:
+      operationId: ai_answer_create
+      tags:
+      - ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AnswerRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnswerRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/ai/chat/:
+    post:
+      operationId: ai_chat_create
+      tags:
+      - ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChatRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChatRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/ai/conversations/:
+    get:
+      operationId: ai_conversations_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedConversationList'
+          description: ''
+  /api/ai/conversations/{id}/:
+    get:
+      operationId: ai_conversations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationDetail'
+          description: ''
+    delete:
+      operationId: ai_conversations_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/ai/memory/:
+    delete:
+      operationId: ai_memory_destroy
+      tags:
+      - ai
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/ai/summarize/:
+    post:
+      operationId: ai_summarize_create
+      tags:
+      - ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SummarizeRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SummarizeRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SummarizeRequestRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/analytics/summary/:
+    get:
+      operationId: analytics_summary_retrieve
+      tags:
+      - analytics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: auth_me_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: auth_me_partial_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/auth/refresh/:
+    post:
+      operationId: auth_refresh_create
+      description: Exchanges the httpOnly refresh cookie for a new access token (and
+        rotates the cookie).
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Access'
+          description: ''
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          description: ''
+  /api/auth/users/:
+    get:
+      operationId: auth_users_list
+      description: 'Admin-only: list accounts (role-based permission example).'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+  /api/bookmarks/:
+    get:
+      operationId: bookmarks_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - bookmarks
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedKnowledgeItemList'
+          description: ''
+    post:
+      operationId: bookmarks_create
+      tags:
+      - bookmarks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeItemRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/KnowledgeItemRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/KnowledgeItemRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeItem'
+          description: ''
+  /api/collections/:
+    get:
+      operationId: collections_list
+      description: Every queryset is scoped to the requesting user. Other users' rows
+        resolve to 404.
+      tags:
+      - collections
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Collection'
+          description: ''
+    post:
+      operationId: collections_create
+      description: Every queryset is scoped to the requesting user. Other users' rows
+        resolve to 404.
+      tags:
+      - collections
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CollectionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CollectionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+          description: ''
+  /api/collections/{id}/:
+    get:
+      operationId: collections_retrieve
+      description: Every queryset is scoped to the requesting user. Other users' rows
+        resolve to 404.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this collection.
+        required: true
+      tags:
+      - collections
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+          description: ''
+    put:
+      operationId: collections_update
+      description: Every queryset is scoped to the requesting user. Other users' rows
+        resolve to 404.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this collection.
+        required: true
+      tags:
+      - collections
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CollectionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CollectionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+          description: ''
+    patch:
+      operationId: collections_partial_update
+      description: Every queryset is scoped to the requesting user. Other users' rows
+        resolve to 404.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this collection.
+        required: true
+      tags:
+      - collections
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCollectionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCollectionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCollectionRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+          description: ''
+    delete:
+      operationId: collections_destroy
+      description: Every queryset is scoped to the requesting user. Other users' rows
+        resolve to 404.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this collection.
+        required: true
+      tags:
+      - collections
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/collections/tags/:
+    get:
+      operationId: collections_tags_list
+      description: Every queryset is scoped to the requesting user. Other users' rows
+        resolve to 404.
+      tags:
+      - collections
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+          description: ''
+    post:
+      operationId: collections_tags_create
+      description: Every queryset is scoped to the requesting user. Other users' rows
+        resolve to 404.
+      tags:
+      - collections
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+          description: ''
+  /api/collections/tags/{id}/:
+    delete:
+      operationId: collections_tags_destroy
+      description: Every queryset is scoped to the requesting user. Other users' rows
+        resolve to 404.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tag.
+        required: true
+      tags:
+      - collections
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/knowledge/:
+    get:
+      operationId: knowledge_list
+      parameters:
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - bookmark
+          - document
+          - note
+        description: |-
+          * `note` - Note
+          * `bookmark` - Bookmark
+          * `document` - Document
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - failed
+          - pending
+          - ready
+        description: |-
+          * `pending` - Pending
+          * `ready` - Ready
+          * `failed` - Failed
+      tags:
+      - knowledge
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedKnowledgeItemList'
+          description: ''
+  /api/knowledge/{id}/:
+    get:
+      operationId: knowledge_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - knowledge
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeItemDetail'
+          description: ''
+    patch:
+      operationId: knowledge_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - knowledge
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedItemUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeItemDetail'
+          description: ''
+    delete:
+      operationId: knowledge_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - knowledge
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/knowledge/{id}/download/:
+    get:
+      operationId: knowledge_download_retrieve
+      description: 'Private download: streamed through the API after an ownership
+        check, never a public URL.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - knowledge
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /api/knowledge/save/:
+    post:
+      operationId: knowledge_save_create
+      tags:
+      - knowledge
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SaveRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SaveRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeItem'
+          description: ''
+  /api/knowledge/upload/:
+    post:
+      operationId: knowledge_upload_create
+      tags:
+      - knowledge
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeItem'
+          description: ''
+  /api/search/ai/:
+    post:
+      operationId: search_ai_create
+      description: POST /api/search/ai/ — same as /api/ai/answer/ but recorded in
+        search history.
+      tags:
+      - search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AnswerRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnswerRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/search/history/:
+    get:
+      operationId: search_history_list
+      parameters:
+      - in: query
+        name: mode
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - search
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSearchQueryList'
+          description: ''
+    delete:
+      operationId: search_history_destroy
+      tags:
+      - search
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/search/history/{id}/:
+    delete:
+      operationId: search_history_destroy_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - search
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/search/personal/:
+    post:
+      operationId: search_personal_create
+      tags:
+      - search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalSearchRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PersonalSearchRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PersonalSearchRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/search/suggestions/:
+    get:
+      operationId: search_suggestions_retrieve
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+      tags:
+      - search
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/search/web/:
+    post:
+      operationId: search_web_create
+      tags:
+      - search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebSearchRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WebSearchRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WebSearchRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/settings/:
+    get:
+      operationId: settings_retrieve
+      tags:
+      - settings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+          description: ''
+    put:
+      operationId: settings_update
+      tags:
+      - settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettingsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserSettingsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserSettingsRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+          description: ''
+    patch:
+      operationId: settings_partial_update
+      tags:
+      - settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSettingsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSettingsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSettingsRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+          description: ''
+components:
+  schemas:
+    Access:
+      type: object
+      properties:
+        access:
+          type: string
+      required:
+      - access
+    AnswerRequestRequest:
+      type: object
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        use_web:
+          type: boolean
+        use_personal:
+          type: boolean
+      required:
+      - question
+    AuthResponse:
+      type: object
+      properties:
+        access:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+      - access
+      - user
+    ChatRequestRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        conversation_id:
+          type: integer
+          nullable: true
+        use_web:
+          type: boolean
+        use_personal:
+          type: boolean
+      required:
+      - message
+    Collection:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 120
+        description:
+          type: string
+        item_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - item_count
+      - name
+      - updated_at
+    CollectionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+      required:
+      - name
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - updated_at
+    ConversationDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - messages
+      - updated_at
+    DefaultSearchModeEnum:
+      enum:
+      - web
+      - personal
+      - ai
+      type: string
+      description: |-
+        * `web` - Web
+        * `personal` - Personal
+        * `ai` - AI
+    Kind94fEnum:
+      enum:
+      - note
+      - bookmark
+      - document
+      type: string
+      description: |-
+        * `note` - Note
+        * `bookmark` - Bookmark
+        * `document` - Document
+    KnowledgeItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/Kind94fEnum'
+        title:
+          type: string
+          maxLength: 300
+        url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 2000
+          - type: string
+            maxLength: 0
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        error:
+          type: string
+          maxLength: 300
+        tags:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        collection_ids:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+        original_name:
+          type: string
+          nullable: true
+          readOnly: true
+        snippet:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - collection_ids
+      - created_at
+      - id
+      - kind
+      - original_name
+      - snippet
+      - tags
+      - title
+      - updated_at
+    KnowledgeItemDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/Kind94fEnum'
+        title:
+          type: string
+          maxLength: 300
+        url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 2000
+          - type: string
+            maxLength: 0
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        error:
+          type: string
+          maxLength: 300
+        tags:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        collection_ids:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+        original_name:
+          type: string
+          nullable: true
+          readOnly: true
+        snippet:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        content:
+          type: string
+          readOnly: true
+        content_truncated:
+          type: boolean
+          readOnly: true
+      required:
+      - collection_ids
+      - content
+      - content_truncated
+      - created_at
+      - id
+      - kind
+      - original_name
+      - snippet
+      - tags
+      - title
+      - updated_at
+    KnowledgeItemRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/Kind94fEnum'
+        title:
+          type: string
+          minLength: 1
+          maxLength: 300
+        url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 2000
+          - type: string
+            maxLength: 0
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        error:
+          type: string
+          maxLength: 300
+      required:
+      - kind
+      - title
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        role:
+          type: string
+          maxLength: 10
+        content:
+          type: string
+        citations: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content
+      - created_at
+      - id
+      - role
+    PaginatedConversationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Conversation'
+    PaginatedKnowledgeItemList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeItem'
+    PaginatedSearchQueryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchQuery'
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PatchedCollectionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+    PatchedItemUpdateRequest:
+      type: object
+      properties:
+        collection_ids:
+          type: array
+          items:
+            type: integer
+        tags:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+        title:
+          type: string
+          minLength: 1
+          maxLength: 300
+        content:
+          type: string
+    PatchedUserRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          maxLength: 120
+    PatchedUserSettingsRequest:
+      type: object
+      properties:
+        save_search_history:
+          type: boolean
+        ai_memory_enabled:
+          type: boolean
+        default_search_mode:
+          $ref: '#/components/schemas/DefaultSearchModeEnum'
+        ai_use_web:
+          type: boolean
+        ai_use_personal:
+          type: boolean
+        results_per_page:
+          type: integer
+          maximum: 50
+          minimum: 5
+    PersonalSearchRequestKindEnum:
+      enum:
+      - note
+      - bookmark
+      - document
+      type: string
+      description: |-
+        * `note` - note
+        * `bookmark` - bookmark
+        * `document` - document
+    PersonalSearchRequestRequest:
+      type: object
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 500
+        limit:
+          type: integer
+          maximum: 50
+          minimum: 1
+          default: 10
+        kind:
+          $ref: '#/components/schemas/PersonalSearchRequestKindEnum'
+        collection:
+          type: integer
+        tag:
+          type: string
+          minLength: 1
+          maxLength: 50
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+      required:
+      - query
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        display_name:
+          type: string
+          maxLength: 120
+      required:
+      - email
+      - password
+    RoleEnum:
+      enum:
+      - user
+      - admin
+      type: string
+      description: |-
+        * `user` - User
+        * `admin` - Admin
+    SaveRequest:
+      type: object
+      description: Save a note (title + content) or a website (url).
+      properties:
+        collection_ids:
+          type: array
+          items:
+            type: integer
+        tags:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+        title:
+          type: string
+          maxLength: 300
+        content:
+          type: string
+        url:
+          type: string
+          format: uri
+          minLength: 1
+    SearchQuery:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        mode:
+          type: string
+          maxLength: 10
+        query:
+          type: string
+          maxLength: 500
+        filters: {}
+        result_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - mode
+      - query
+    StatusEnum:
+      enum:
+      - pending
+      - ready
+      - failed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `ready` - Ready
+        * `failed` - Failed
+    StyleEnum:
+      enum:
+      - concise
+      - bullets
+      - detailed
+      type: string
+      description: |-
+        * `concise` - concise
+        * `bullets` - bullets
+        * `detailed` - detailed
+    SummarizeRequestRequest:
+      type: object
+      properties:
+        item_id:
+          type: integer
+        url:
+          type: string
+          format: uri
+          minLength: 1
+        text:
+          type: string
+          minLength: 1
+          maxLength: 200000
+        style:
+          allOf:
+          - $ref: '#/components/schemas/StyleEnum'
+          default: concise
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 50
+      required:
+      - id
+      - name
+    TagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+      required:
+      - name
+    TimeRangeEnum:
+      enum:
+      - day
+      - week
+      - month
+      - year
+      type: string
+      description: |-
+        * `day` - day
+        * `week` - week
+        * `month` - month
+        * `year` - year
+    UploadRequest:
+      type: object
+      properties:
+        collection_ids:
+          type: array
+          items:
+            type: integer
+        tags:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+        file:
+          type: string
+          format: binary
+        title:
+          type: string
+          maxLength: 300
+      required:
+      - file
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        display_name:
+          type: string
+          maxLength: 120
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - email
+      - id
+      - role
+    UserRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          maxLength: 120
+    UserSettings:
+      type: object
+      properties:
+        save_search_history:
+          type: boolean
+        ai_memory_enabled:
+          type: boolean
+        default_search_mode:
+          $ref: '#/components/schemas/DefaultSearchModeEnum'
+        ai_use_web:
+          type: boolean
+        ai_use_personal:
+          type: boolean
+        results_per_page:
+          type: integer
+          maximum: 50
+          minimum: 5
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - updated_at
+    UserSettingsRequest:
+      type: object
+      properties:
+        save_search_history:
+          type: boolean
+        ai_memory_enabled:
+          type: boolean
+        default_search_mode:
+          $ref: '#/components/schemas/DefaultSearchModeEnum'
+        ai_use_web:
+          type: boolean
+        ai_use_personal:
+          type: boolean
+        results_per_page:
+          type: integer
+          maximum: 50
+          minimum: 5
+    WebSearchRequestRequest:
+      type: object
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 500
+        limit:
+          type: integer
+          maximum: 20
+          minimum: 1
+          default: 10
+        time_range:
+          $ref: '#/components/schemas/TimeRangeEnum'
+      required:
+      - query
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
