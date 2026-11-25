@@ -8,8 +8,8 @@ A private search engine you own: **web search** (Google-style), **AI answers wit
 | Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS (responsive; dark mode follows the OS) |
 | Backend | Python 3.12, Django 5, Django REST Framework, Celery, Daphne (ASGI / Channels) |
 | Data | PostgreSQL 16 + **pgvector**, Redis (cache + task queue), S3-compatible object storage (MinIO locally) |
-| AI | Any OpenAI-compatible API (OpenAI, Ollama, vLLM…) or Anthropic for answers; OpenAI-compatible embeddings |
-| Web search | Brave Search API or Tavily (swap with one env var) |
+| AI | Any OpenAI-compatible API  Ollama
+| Web search |  Tavily 
 
 ## Quick start (Docker)
 
