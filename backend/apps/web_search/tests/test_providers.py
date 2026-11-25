@@ -1,4 +1,6 @@
-from apps.web_search.providers import BingProvider, DuckDuckGoProvider
+from django.test import override_settings
+
+from apps.web_search.providers import BingProvider, BraveProvider, DuckDuckGoProvider
 
 
 class FakeResponse:
@@ -52,3 +54,49 @@ def test_bing_provider_returns_rss_results(monkeypatch):
 
 def test_bing_provider_repairs_mojibake():
     assert BingProvider._clean_text("We couldnât load results") == "We couldn’t load results"
+
+
+def test_brave_provider_returns_image_media_urls(monkeypatch):
+    class BraveResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"results": [{
+                "title": "Example image",
+                "url": "https://example.com/page",
+                "source": "example.com",
+                "thumbnail": {"src": "https://example.com/thumb.jpg"},
+                "properties": {"url": "https://example.com/image.jpg"},
+            }]}
+
+    monkeypatch.setattr("apps.web_search.providers.httpx.get", lambda *args, **kwargs: BraveResponse())
+    with override_settings(BRAVE_API_KEY="test-key"):
+        result = BraveProvider().search_media("example", "images")[0]
+
+    assert result.url == "https://example.com/page"
+    assert result.thumbnail_url == "https://example.com/thumb.jpg"
+    assert result.image_url == "https://example.com/image.jpg"
+    assert result.media_type == "image"
+
+
+def test_brave_provider_returns_video_thumbnail(monkeypatch):
+    class BraveResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"results": [{
+                "title": "Example video",
+                "url": "https://example.com/watch",
+                "description": "A video result",
+                "thumbnail": {"src": "https://example.com/video-thumb.jpg"},
+            }]}
+
+    monkeypatch.setattr("apps.web_search.providers.httpx.get", lambda *args, **kwargs: BraveResponse())
+    with override_settings(BRAVE_API_KEY="test-key"):
+        result = BraveProvider().search_media("example", "videos")[0]
+
+    assert result.url == "https://example.com/watch"
+    assert result.thumbnail_url == "https://example.com/video-thumb.jpg"
+    assert result.media_type == "video"

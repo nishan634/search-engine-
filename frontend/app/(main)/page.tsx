@@ -56,13 +56,13 @@ function SearchInner() {
     }, 200);
   }
 
-  async function run(query = q, m: Mode = mode) {
+  async function run(query = q, m: Mode = mode, searchCategory = category) {
     if (!query.trim()) return;
     setBusy(true); setError(""); setSugg([]); setWeb(null); setPersonal(null); setAi(null);
     try {
       if (m === "web") {
         const r = await api<{ results: WebResult[] }>("/search/web/", {
-          body: { query, category, ...(timeRange && { time_range: timeRange }) },
+          body: { query, category: searchCategory, ...(timeRange && { time_range: timeRange }) },
         });
         setWeb(r.results);
       } else if (m === "personal") {
@@ -88,7 +88,10 @@ function SearchInner() {
       {mode === "web" && (
         <div className="mb-3 flex flex-wrap gap-2" aria-label="Search categories">
           {CATEGORIES.map((item) => (
-            <button key={item.id} type="button" onClick={() => setCategory(item.id)}
+            <button key={item.id} type="button" onClick={() => {
+              setCategory(item.id);
+              if (mode === "web" && q.trim()) run(q, mode, item.id);
+            }}
               className={`rounded-full px-3 py-1 text-xs ${category === item.id
                 ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                 : "border border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-300"}`}>
@@ -148,10 +151,24 @@ function SearchInner() {
       )}
 
       {web && (
-        <ul className="mt-6 space-y-3">
+        <ul className={`mt-6 ${category === "images" || category === "videos" ? "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" : "space-y-3"}`}>
           {web.length === 0 && <li className="muted">No results.</li>}
           {web.map((r, i) => (
-            <li key={i} className="card">
+            <li key={i} className="card overflow-hidden">
+              {category === "images" && (r.thumbnail_url || r.image_url) && (
+                <a href={r.url} target="_blank" rel="noopener noreferrer" className="mb-3 block">
+                  <img src={r.thumbnail_url || r.image_url!} alt={r.title} loading="lazy"
+                    className="h-52 w-full rounded-lg object-cover" />
+                </a>
+              )}
+              {category === "videos" && r.thumbnail_url && (
+                <a href={r.url} target="_blank" rel="noopener noreferrer" className="group relative mb-3 block">
+                  <img src={r.thumbnail_url} alt="" loading="lazy" className="h-52 w-full rounded-lg object-cover" />
+                  <span aria-label="Play video" className="absolute inset-0 flex items-center justify-center">
+                    <span className="rounded-full bg-black/70 px-4 py-2 text-white transition group-hover:bg-indigo-600">▶</span>
+                  </span>
+                </a>
+              )}
               <a href={r.url} target="_blank" rel="noopener noreferrer" className="font-medium text-indigo-700 hover:underline dark:text-indigo-300">{r.title}</a>
               <div className="truncate text-xs text-emerald-700 dark:text-emerald-400">{r.url}</div>
               <p className="muted mt-1">{r.snippet}</p>

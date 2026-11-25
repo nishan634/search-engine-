@@ -30,6 +30,7 @@ What runs: `db` (Postgres+pgvector), `redis`, `minio` (+ bucket bootstrap), `bac
 
 > Without API keys the app still works: personal keyword search, notes, uploads and collections run fully offline.
 > Semantic search, AI answers and web search report a clear 503 until their keys are configured.
+> Image and video searches use Brave's dedicated media results for thumbnail previews; other providers return standard web links.
 
 ## Local development without Docker
 

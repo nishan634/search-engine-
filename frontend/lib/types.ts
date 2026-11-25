@@ -1,6 +1,9 @@
 export type Mode = "web" | "personal" | "ai";
 export interface User { id: number; email: string; display_name: string; role: string }
-export interface WebResult { title: string; url: string; snippet: string }
+export interface WebResult {
+  title: string; url: string; snippet: string;
+  thumbnail_url?: string | null; image_url?: string | null; media_type?: "image" | "video" | null;
+}
 export interface PersonalResult {
   id: number; kind: string; title: string; url: string; snippet: string; tags: string[]; score: number; created_at: string;
 }

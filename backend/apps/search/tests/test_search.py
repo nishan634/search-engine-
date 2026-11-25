@@ -91,6 +91,32 @@ def test_web_search_category_is_sent(api, monkeypatch):
     assert calls == ["Balen Shah latest news"]
 
 
+def test_web_search_image_category_uses_media_results(api, monkeypatch):
+    calls = []
+
+    class P:
+        def search(self, q, count=10, time_range=None):
+            raise AssertionError("Image search should use native media results.")
+
+        def search_media(self, query, category, count=10, time_range=None):
+            calls.append((query, category))
+            return [WebResult(
+                "Example image",
+                "https://example.com/page",
+                "Example source",
+                thumbnail_url="https://example.com/thumb.jpg",
+                image_url="https://example.com/image.jpg",
+                media_type="image",
+            )]
+
+    monkeypatch.setattr("apps.web_search.providers.get_web_provider", lambda: P())
+    r = api.post("/api/search/web/", {"query": "example", "category": "images"}, format="json")
+
+    assert r.status_code == 200
+    assert calls == [("example", "images")]
+    assert r.data["results"][0]["image_url"] == "https://example.com/image.jpg"
+
+
 def test_search_validation(api):
     assert api.post("/api/search/web/", {"query": ""}, format="json").status_code == 400
     assert api.post("/api/search/personal/", {"query": "x", "limit": 999}, format="json").status_code == 400
