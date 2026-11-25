@@ -170,8 +170,12 @@ function SearchInner() {
                 </a>
               )}
               <a href={r.url} target="_blank" rel="noopener noreferrer" className="font-medium text-indigo-700 hover:underline dark:text-indigo-300">{r.title}</a>
-              <div className="truncate text-xs text-emerald-700 dark:text-emerald-400">{r.url}</div>
-              <p className="muted mt-1">{r.snippet}</p>
+              {category !== "images" && category !== "videos" && (
+                <>
+                  <div className="truncate text-xs text-emerald-700 dark:text-emerald-400">{r.url}</div>
+                  <p className="muted mt-1">{r.snippet}</p>
+                </>
+              )}
             </li>
           ))}
         </ul>
