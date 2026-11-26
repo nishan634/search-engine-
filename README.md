@@ -16,7 +16,8 @@ A private search engine you own: **web search** (Google-style), **AI answers wit
 ```bash
 cp .env.example .env
 # edit .env: set DJANGO_SECRET_KEY, POSTGRES_PASSWORD, AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (MinIO credentials),
-# OPENAI_API_KEY (or OPENAI_BASE_URL for Ollama) and BRAVE_API_KEY (or TAVILY_API_KEY + WEB_SEARCH_PROVIDER=tavily)
+# OPENAI_API_KEY (or OPENAI_BASE_URL and LLM_MODEL matching your Ollama model, e.g. llama3.2:3b)
+# and BRAVE_API_KEY (or TAVILY_API_KEY + WEB_SEARCH_PROVIDER=tavily)
 
 docker compose up -d --build
 docker compose exec backend python manage.py createsuperuser   # optional: Django admin at http://localhost:8000/admin/
@@ -30,7 +31,7 @@ What runs: `db` (Postgres+pgvector), `redis`, `minio` (+ bucket bootstrap), `bac
 
 > Without API keys the app still works: personal keyword search, notes, uploads and collections run fully offline.
 > Semantic search, AI answers and web search report a clear 503 until their keys are configured.
-> Image and video searches use Brave's dedicated media results for thumbnail previews; other providers return standard web links.
+> Image previews are supported by Tavily, Bing, and Brave; video previews are supported by Bing and Brave.
 
 ## Local development without Docker
 

@@ -109,18 +109,8 @@ def answer_question(user, question, use_web=True, use_personal=True, history=Non
         for m in (history or [])[-MAX_HISTORY_TURNS * 2:]:
             messages.append({"role": m["role"], "content": m["content"]})
         messages.append({"role": "user", "content": question})
-        try:
-            text = providers.get_llm_provider().chat(messages)
-            return {"answer": text, "citations": [], "warnings": warnings}
-        except providers.ProviderError:
-            return {
-                "answer": (
-                    "I’m ready to help with programming, but no LLM provider is currently configured. "
-                    "Set OPENAI_API_KEY or an OpenAI-compatible endpoint such as Ollama, then retry."
-                ),
-                "citations": [],
-                "warnings": warnings + ["AI generation is unavailable because no LLM provider is configured."],
-            }
+        text = providers.get_llm_provider().chat(messages)
+        return {"answer": text, "citations": [], "warnings": warnings}
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     for m in (history or [])[-MAX_HISTORY_TURNS * 2:]:
         messages.append({"role": m["role"], "content": m["content"]})

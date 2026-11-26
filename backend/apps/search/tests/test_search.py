@@ -66,6 +66,41 @@ def test_web_search_uses_provider_and_caches(api, monkeypatch):
     assert len(calls) == 1
 
 
+def test_web_search_uses_tavily_when_selected(api, monkeypatch):
+    calls = []
+
+    def search(self, query, count=10, time_range=None):
+        calls.append(query)
+        return [WebResult("Tavily result", "https://example.com/tavily", "A result from Tavily.")]
+
+    monkeypatch.setattr("apps.web_search.services.settings.WEB_SEARCH_PROVIDER", "tavily")
+    monkeypatch.setattr("apps.web_search.providers.TavilyProvider.search", search)
+    r = api.post("/api/search/web/", {"query": "latest research"}, format="json")
+
+    assert r.status_code == 200
+    assert calls == ["latest research"]
+    assert r.data["results"][0]["url"] == "https://example.com/tavily"
+
+
+def test_video_search_falls_back_to_bing_when_tavily_is_selected(api, monkeypatch):
+    def search_media(self, query, category, count=10, time_range=None):
+        assert category == "videos"
+        return [WebResult(
+            "Nature video",
+            "https://example.com/video",
+            "A video result.",
+            thumbnail_url="https://example.com/thumbnail.jpg",
+            media_type="video",
+        )]
+
+    monkeypatch.setattr("apps.web_search.services.settings.WEB_SEARCH_PROVIDER", "tavily")
+    monkeypatch.setattr("apps.web_search.providers.BingProvider.search_media", search_media)
+    r = api.post("/api/search/web/", {"query": "nature", "category": "videos"}, format="json")
+
+    assert r.status_code == 200
+    assert r.data["results"][0]["media_type"] == "video"
+
+
 def test_web_search_not_configured_returns_503(api, monkeypatch):
     class P:
         def search(self, q, count=10, time_range=None):
@@ -115,6 +150,70 @@ def test_web_search_image_category_uses_media_results(api, monkeypatch):
     assert r.status_code == 200
     assert calls == [("example", "images")]
     assert r.data["results"][0]["image_url"] == "https://example.com/image.jpg"
+
+
+def test_web_search_removes_generic_image_words(api, monkeypatch):
+    calls = []
+
+    class P:
+        def search(self, q, count=10, time_range=None):
+            raise AssertionError("Image search should use native media results.")
+
+        def search_media(self, query, category, count=10, time_range=None):
+            calls.append(query)
+            return []
+
+    monkeypatch.setattr("apps.web_search.providers.get_web_provider", lambda: P())
+    r = api.post("/api/search/web/", {"query": "lion picture", "category": "images"}, format="json")
+
+    assert r.status_code == 200
+    assert calls == ["lion"]
+
+
+def test_web_search_filters_unrelated_image_results(api, monkeypatch):
+    class P:
+        def search(self, q, count=10, time_range=None):
+            raise AssertionError("Image search should use native media results.")
+
+        def search_media(self, query, category, count=10, time_range=None):
+            return [
+                WebResult("Private IP address space", "https://example.com/private-ip", ""),
+                WebResult("Lion in the wild", "https://example.com/lion", ""),
+            ]
+
+    monkeypatch.setattr("apps.web_search.providers.get_web_provider", lambda: P())
+    r = api.post("/api/search/web/", {"query": "lion picture", "category": "images"}, format="json")
+
+    assert r.status_code == 200
+    assert [result["title"] for result in r.data["results"]] == ["Lion in the wild"]
+
+
+def test_image_search_uses_tavily_when_key_is_configured(api, monkeypatch):
+    calls = []
+
+    class P:
+        def search(self, q, count=10, time_range=None):
+            raise AssertionError("Image search should use Tavily image results.")
+
+    def search_media(self, query, category, count=10, time_range=None):
+        calls.append((query, category))
+        return [WebResult(
+            "Portrait",
+            "https://example.com/photo.jpg",
+            "",
+            thumbnail_url="https://example.com/photo.jpg",
+            image_url="https://example.com/photo.jpg",
+            media_type="image",
+        )]
+
+    monkeypatch.setattr("apps.web_search.providers.get_web_provider", lambda: P())
+    monkeypatch.setattr("apps.web_search.providers.TavilyProvider.search_media", search_media)
+    monkeypatch.setattr("apps.web_search.services.settings.TAVILY_API_KEY", "test-key")
+    r = api.post("/api/search/web/", {"query": "neymar pic", "category": "images"}, format="json")
+
+    assert r.status_code == 200
+    assert calls == [("neymar", "images")]
+    assert r.data["results"][0]["thumbnail_url"] == "https://example.com/photo.jpg"
 
 
 def test_search_validation(api):

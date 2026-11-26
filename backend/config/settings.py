@@ -2,7 +2,11 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 
 def env(key, default=None):
@@ -189,7 +193,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_MB * 1024 * 1024
 LLM_PROVIDER = env("LLM_PROVIDER", "openai")  # openai | anthropic
 OPENAI_API_KEY = env("OPENAI_API_KEY", "")
 OPENAI_BASE_URL = env("OPENAI_BASE_URL", "http://127.0.0.1:11434/v1")  # Ollama or OpenAI-compatible server
-LLM_MODEL = env("LLM_MODEL", "llama3.2")
+LLM_MODEL = env("LLM_MODEL", "llama3.2:3b")
 EMBEDDING_MODEL = env("EMBEDDING_MODEL", "text-embedding-3-small")
 EMBEDDING_DIMENSIONS = 1536  # fixed by the DB schema; changing it needs a migration
 EMBEDDING_SEND_DIMENSIONS = env_bool("EMBEDDING_SEND_DIMENSIONS", True)
@@ -197,7 +201,7 @@ ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = env("ANTHROPIC_MODEL", "claude-sonnet-5-5")
 
 # ---- Web search ----
-WEB_SEARCH_PROVIDER = env("WEB_SEARCH_PROVIDER", "bing")  # brave | tavily | duckduckgo | bing
+WEB_SEARCH_PROVIDER = env("WEB_SEARCH_PROVIDER", "tavily" if env("TAVILY_API_KEY") else "bing")  # brave | tavily | duckduckgo | bing
 BRAVE_API_KEY = env("BRAVE_API_KEY", "")
 TAVILY_API_KEY = env("TAVILY_API_KEY", "")
 WEB_SEARCH_CACHE_SECONDS = int(env("WEB_SEARCH_CACHE_SECONDS", "600"))

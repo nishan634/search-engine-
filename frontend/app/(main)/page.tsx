@@ -36,6 +36,7 @@ function SearchInner() {
   const [ai, setAi] = useState<AIAnswer | null>(null);
   const [sugg, setSugg] = useState<{ text: string; source: string }[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout>>();
+  const searchRequest = useRef(0);
 
   useEffect(() => {
     api<Settings>("/settings/").then((s) => {
@@ -48,6 +49,12 @@ function SearchInner() {
 
   function onInput(v: string) {
     setQ(v);
+    searchRequest.current += 1;
+    setBusy(false);
+    setError("");
+    setWeb(null);
+    setPersonal(null);
+    setAi(null);
     clearTimeout(timer.current);
     if (v.trim().length < 2) return setSugg([]);
     timer.current = setTimeout(() => {
@@ -58,21 +65,36 @@ function SearchInner() {
 
   async function run(query = q, m: Mode = mode, searchCategory = category) {
     if (!query.trim()) return;
+    const requestId = ++searchRequest.current;
     setBusy(true); setError(""); setSugg([]); setWeb(null); setPersonal(null); setAi(null);
     try {
       if (m === "web") {
         const r = await api<{ results: WebResult[] }>("/search/web/", {
           body: { query, category: searchCategory, ...(timeRange && { time_range: timeRange }) },
         });
+        if (requestId !== searchRequest.current) return;
         setWeb(r.results);
       } else if (m === "personal") {
         const r = await api<{ results: PersonalResult[] }>("/search/personal/", { body: { query, ...(kind && { kind }) } });
+        if (requestId !== searchRequest.current) return;
         setPersonal(r.results);
       } else {
-        setAi(await api<AIAnswer>("/search/ai/", { body: { question: query, use_web: useWeb, use_personal: usePersonal } }));
+        const answer = await api<AIAnswer>("/search/ai/", { body: { question: query, use_web: useWeb, use_personal: usePersonal } });
+        if (requestId !== searchRequest.current) return;
+        setAi(answer);
       }
-    } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
+    } catch (e) {
+      if (requestId === searchRequest.current) setError((e as Error).message);
+    } finally {
+      if (requestId === searchRequest.current) setBusy(false);
+    }
   }
+
+  const visibleWeb = web?.filter((r) => {
+    if (category === "images") return Boolean(r.thumbnail_url || r.image_url);
+    if (category === "videos") return Boolean(r.thumbnail_url);
+    return true;
+  }) ?? [];
 
   return (
     <div>
@@ -152,8 +174,17 @@ function SearchInner() {
 
       {web && (
         <ul className={`mt-6 ${category === "images" || category === "videos" ? "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" : "space-y-3"}`}>
-          {web.length === 0 && <li className="muted">No results.</li>}
-          {web.map((r, i) => (
+          {web.length === 0 && (
+            <li className="muted">
+              {category === "images" ? "No relevant images found." : category === "videos" ? "No relevant videos found." : "No results."}
+            </li>
+          )}
+          {web.length > 0 && visibleWeb.length === 0 && (category === "images" || category === "videos") && (
+            <li className="muted col-span-full">
+              No media previews were returned. Use Bing or Brave for image and video previews; restart the backend if it was just updated.
+            </li>
+          )}
+          {visibleWeb.map((r, i) => (
             <li key={i} className="card overflow-hidden">
               {category === "images" && (r.thumbnail_url || r.image_url) && (
                 <a href={r.url} target="_blank" rel="noopener noreferrer" className="mb-3 block">

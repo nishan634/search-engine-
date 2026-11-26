@@ -20,6 +20,17 @@ def note(api, fake_embeddings):
                     format="json").data
 
 
+@pytest.fixture
+def unavailable_llm(monkeypatch):
+    from apps.ai_engine.providers import ProviderNotConfigured
+
+    class UnavailableProvider:
+        def chat(self, messages, temperature=0.2):
+            raise ProviderNotConfigured("LLM provider is unavailable.")
+
+    monkeypatch.setattr("apps.ai_engine.providers.get_llm_provider", lambda: UnavailableProvider())
+
+
 def test_ai_search_combines_personal_and_web_with_citations(api, note, web, fake_llm):
     r = api.post("/api/search/ai/", {"question": "llamas"}, format="json")
     assert r.status_code == 200
@@ -44,6 +55,17 @@ def test_no_sources_still_allows_general_ai_answer(api, fake_llm, fake_embedding
     assert r.status_code == 200
     assert r.data["citations"] == []
     assert fake_llm.calls
+
+
+def test_no_source_chat_reports_provider_failure(api, unavailable_llm):
+    r = api.post("/api/ai/chat/", {
+        "message": "Explain recursion",
+        "use_web": False,
+        "use_personal": False,
+    }, format="json")
+
+    assert r.status_code == 503
+    assert r.data["detail"] == "LLM provider is unavailable."
 
 
 def test_chat_followup_uses_history_and_persists(api, note, web, fake_llm):
@@ -85,7 +107,7 @@ def test_summarize_url_blocks_private_addresses(api):
     assert r.status_code == 400
 
 
-def test_llm_not_configured_returns_source_fallback(api, note):
+def test_llm_not_configured_returns_source_fallback(api, note, unavailable_llm):
     r = api.post("/api/ai/answer/", {"question": "llamas", "use_web": False}, format="json")
     assert r.status_code == 200
     assert "Here is what the available sources report:" in r.data["answer"]
@@ -93,7 +115,7 @@ def test_llm_not_configured_returns_source_fallback(api, note):
     assert "no LLM provider is configured" in r.data["warnings"][0]
 
 
-def test_nepal_pm_fallback_is_concise(api, monkeypatch):
+def test_nepal_pm_fallback_is_concise(api, monkeypatch, unavailable_llm):
     from apps.web_search.providers import WebResult
 
     class P:
